@@ -1,5 +1,6 @@
 import payoff
 import random
+from math import exp, isnan
 
 f_in = open('parameters.txt', 'r')
 f_out = open('avgpayoff.txt', 'w')
@@ -16,7 +17,7 @@ def choose_strat (strat):
         partial += strat[i][-1]
         if c_ind <= partial:
             return i
-    return i
+    return -1
 
 def check_equal (strat, new_s):
     for i in range(len(strat)):
@@ -29,7 +30,6 @@ def mutation (strat):
 
     # check if random new strat is same
     ind = check_equal (strat, new_strat)
-    print ind
     if ind != -1:
         strat[ind][-1] += 1.
     # if not the same, then add strat
@@ -42,13 +42,42 @@ def mutation (strat):
     strat = check_extinct(strat)
     return strat
 
-print mutation(strategies)
+#print mutation(strategies)
+#print payoff.total_payoff(strategies)
 
-print payoff.total_payoff(strategies)
-
-def selection (strat):
+def selection (s, strat):
     ind_l = choose_strat(strat)
     ind_r = choose_strat(strat)
     payoffs = payoff.total_payoff(strat)
+    pi_l, pi_r = payoffs[ind_l], payoffs[ind_r]
+    rho = 1./(1. + exp(-s*(float(pi_r) - float(pi_l))))
+    prob = random.uniform(0.0, 1.0)
 
+    # if prob is < rho, then change one of strat_l to strat_r
+    if prob < rho:
+        strat[ind_l][-1] -= 1.
+        strat[ind_r][-1] += 1.
+    return check_extinct(strat)
 
+# s = strength of selection
+# mu = prob of mutation, 1 - mu = prob of selection
+# T = timesteps
+
+def evolve (s, mu, T, strat):
+    avg_payoff = []
+    for t in range(T):
+        if random.uniform(0.0, 0.1) < mu:
+            strat = mutation(strat)
+        else:
+            strat = selection(s, strat)
+        payoffs = payoff.total_payoff(strat)
+        avg = sum([strat[i][-1]*payoffs[i] for i in range(len(strat))])
+        print t
+        if isnan(float(avg)):
+            print payoffs
+            print strat
+            break;
+        avg_payoff.append(float(avg))
+    return avg_payoff
+
+print evolve(1, 0.01, 10000, strategies)

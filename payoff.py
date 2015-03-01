@@ -2,6 +2,7 @@ import numpy as np
 import math
 
 # input file has:
+# eps
 # b c
 # strat: q_cc q_cd q_dc q_dd num
 f_in = open('parameters.txt', 'r')
@@ -9,21 +10,28 @@ f_in = open('parameters.txt', 'r')
 # output file has expected payoffs
 f_out = open('avgpayoff.txt', 'w')
 
-eps = 0.00000001
+# returns info read from file
+def read_parameters (f):
+    eps = float(f.readline())
+    b, c = map(float, f.readline().split())
+    strategies = []
+    total = 0
+    for line in f:
+        new_strat = map(float, line.split())
+        total += new_strat[-1]
+        strategies.append(new_strat)
+    total = float(total)
+    return eps, b, c, strategies, total
 
-b, c = map(float, f_in.readline().split())
-strategies = []
-total = 0
-for line in f_in:
-    new_strat = map(float, line.split())
-    total += new_strat[-1]
-    strategies.append(new_strat)
-total = float(total)
+eps, b, c, strategies, total = read_parameters(f_in)
 
 def error (strat):
     error = [(1.-eps)*strat[i] + eps*(1-strat[i]) for i in range(4)]
     error.append(strat[-1])
     return error
+
+def almost_eq (a, b):
+    return (abs(a - b) <= 0.00000001)
 
 def pairwise_payoff (strat1, strat2, self):
     # add error to strategies
@@ -44,7 +52,8 @@ def pairwise_payoff (strat1, strat2, self):
     eig_vec = np.around(eig_vec, decimals=2)
 
     # find index of vector with eig val = 1
-    ind = list(map(round, eig_val)).index(1.)
+    eig_val = [round(i, 5) for i in eig_val]
+    ind = list(eig_val).index(1.)
 
     # might be scalar multiple, need to normalize so sum to 1
     eig_vec = [elt/sum(list(eig_vec[:,ind])) for elt in eig_vec[:,ind]]
