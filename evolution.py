@@ -1,5 +1,7 @@
 import payoff
 import random
+import numpy as np
+import matplotlib.pyplot as plt
 from math import exp, isnan
 
 f_in = open('parameters.txt', 'r')
@@ -42,9 +44,6 @@ def mutation (strat):
     strat = check_extinct(strat)
     return strat
 
-#print mutation(strategies)
-#print payoff.total_payoff(strategies)
-
 def selection (s, strat):
     ind_l = choose_strat(strat)
     ind_r = choose_strat(strat)
@@ -72,12 +71,16 @@ def evolve (s, mu, T, strat):
             strat = selection(s, strat)
         payoffs = payoff.total_payoff(strat)
         avg = sum([strat[i][-1]*payoffs[i] for i in range(len(strat))])
-        print t
-        if isnan(float(avg)):
-            print payoffs
-            print strat
-            break;
         avg_payoff.append(float(avg))
-    return avg_payoff
+    return strat, avg_payoff
 
-print evolve(1, 0.01, 10000, strategies)
+T = 1000
+strat, y = evolve(100, 0.1, T, strategies)
+print "STRAT", strat
+y = np.array(y)
+x = np.arange(1, T+1)
+plt.xlim((0, T+5))
+plt.ylim((min(y) - 10, max(y) + 10))
+plt.scatter(x, y)
+plt.show()
+
