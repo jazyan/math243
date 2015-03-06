@@ -8,7 +8,7 @@ import math
 f_in = open('parameters.txt', 'r')
 
 # output file has expected payoffs
-f_out = open('avgpayoff.txt', 'w')
+f_out = open('avgpayoff_2.txt', 'w')
 
 # returns info read from file
 def read_parameters (f):
@@ -33,7 +33,7 @@ def error (strat):
 def almost_eq (a, b):
     return (abs(a - b) <= 0.00000001)
 
-def pairwise_payoff (strat1, strat2, self):
+def pairwise_payoff (strat1, strat2):
     # add error to strategies
     p_c = error(strat1)
     q_c = error(strat2)
@@ -61,27 +61,43 @@ def pairwise_payoff (strat1, strat2, self):
     # expected payoffs
     pay_1 = eig_vec[0]*(b-c) + eig_vec[1]*(-c) + eig_vec[2]*b
     pay_2 = eig_vec[0]*(b-c) + eig_vec[1]*(b) + eig_vec[2]*(-c)
+
+    return pay_1, pay_2
+
+def weight_payoff (N1, N2, pay_1, pay_2, self):
     if self:
-        weight_1 = (q_c[-1] - 1)/(total - 1)
-        weight_2 = (p_c[-1] - 1)/(total - 1)
-    else:
-        weight_1 = q_c[-1]/(total - 1)
-        weight_2 = p_c[-1]/(total - 1)
-    return (weight_1*pay_1, weight_2*pay_2)
+        return pay_1*(N2 - 1)/(total - 1)
+    return (pay_1*N2/(total - 1), pay_2*N1/(total - 1))
 
+def create_payoff_mat (strat):
+    mat = [[0 for i in range(len(strat))] for j in range(len(strat))]
+    for i in range(len(strat)):
+        pay_ii, pay_ii = pairwise_payoff(strat[i], strat[i])
+        mat[i][i] = pay_ii
+        for j in range(i+1, len(strat)):
+            pay_ij, pay_ji = pairwise_payoff(strat[i], strat[j])
+            mat[i][j] = pay_ij
+            mat[j][i] = pay_ji
+    return mat
 
-def total_payoff(strat):
+def total_payoff(strat, payoff_mat):
     totals = [0 for i in range(len(strat))]
     for i in range(len(strat)):
         if strat[i][-1] != 1:
-            pi_ii, pi_ii = pairwise_payoff(strat[i], strat[i], 1)
+            #pay_1, pay_2 = pairwise_payoff(strat[i], strat[i])
+            pay_1 = payoff_mat[i][i]
+            pi_ii = weight_payoff(strat[i][-1], strat[i][-1], pay_1, pay_1, 1)
             totals[i] += pi_ii
         for j in range(i+1, len(strat)):
-            pi_ij, pi_ji = pairwise_payoff(strat[i], strat[j], 0)
+            #pay_1, pay_2 = pairwise_payoff(strat[i], strat[j])
+            pay_1 = payoff_mat[i][j]
+            pay_2 = payoff_mat[j][i]
+            pi_ij, pi_ji = weight_payoff(strat[i][-1], strat[j][-1], pay_1, pay_2, 0)
             totals[i] += pi_ij
             totals[j] += pi_ji
-    return totals
+    return map(float, totals)
 
 if __name__ == '__main__':
-    for t in total_payoff(strategies):
+    payoff_mat = create_payoff_mat (strategies)
+    for t in total_payoff(strategies, payoff_mat):
         f_out.write(str(t) + "\n")
