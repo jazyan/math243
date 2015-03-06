@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from math import exp, isnan
 
-f_in = open('check3.txt', 'r')
+f_in = open('parameters.txt', 'r')
 f_out = open('avgpayoff.txt', 'w')
 
 eps, b, c, strategies, total = payoff.read_parameters(f_in)
@@ -80,9 +80,11 @@ def mutation (strat, payoff_mat):
 def selection (s, strat, payoff_mat):
     ind_l = choose_strat(strat)
     ind_r = choose_strat(strat)
+    if ind_l == ind_r:
+        return strat, payoff_mat
     payoffs = payoff.total_payoff(strat, payoff_mat)
     pi_l, pi_r = payoffs[ind_l], payoffs[ind_r]
-    rho = 1./(1. + exp(-s*(float(pi_r) - float(pi_l))))
+    rho = 1./(1. + exp(-s*(pi_r - pi_l)))
     prob = random.uniform(0.0, 1.0)
 
     # if prob is < rho, then change one of strat_l to strat_r
@@ -113,8 +115,8 @@ def evolve (s, mu, T, strat):
     return strat, avg_payoff
 
 T = 1000
-s = 100
-mu = 0.0
+s = 1
+mu = 0.1
 strat, y = evolve(s, mu, T, strategies)
 print "STRAT", strat
 y = np.array(y)
