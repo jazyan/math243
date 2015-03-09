@@ -42,8 +42,13 @@ def check_equal (strat, new_s):
             return i
     return -1
 
-def mutation (strat, payoff_mat):
-    new_strat = [round(random.uniform(0.0, 1.0), 2) for i in range(4)]
+def mutation (strat, payoff_mat, t):
+    if t > 90000:
+        new_strat = [round(random.uniform(0.0, 0.1), 2) for i in range(4)]
+        print new_strat
+    else:
+        new_strat = [round(random.uniform(0.0, 1.0), 2) for i in range(4)]
+        print new_strat
     new = False
     # check if random new strat is same
     ind = check_equal (strat, new_strat)
@@ -101,27 +106,36 @@ def selection (s, strat, payoff_mat):
 # mu = prob of mutation, 1 - mu = prob of selection
 # T = timesteps
 
+def check_defect (strat):
+    z = [s[-1] for s in strat if s[:-1] == [0.0, 0.0, 0.0, 0.0]]
+    if z == []:
+        return True
+    return False
+
 def evolve (s, mu, T, strat):
     payoff_mat = payoff.create_payoff_mat (strat)
     avg_payoff = []
     for t in range(T):
-        if random.uniform(0.0, 0.1) < mu:
-            strat, payoff_mat = mutation(strat, payoff_mat)
+        x = random.uniform(0.0, 1.0)
+        if x < mu:
+            strat, payoff_mat = mutation(strat, payoff_mat, t)
         else:
             strat, payoff_mat = selection(s, strat, payoff_mat)
-        payoffs = payoff.total_payoff(strat, payoff_mat)
-        avg = sum([strat[i][-1]*payoffs[i] for i in range(len(strat))])
-        avg_payoff.append(float(avg))
+        # store every 100th avg payoff
+        if t % 100 == 0:
+            payoffs = payoff.total_payoff(strat, payoff_mat)
+            avg = sum([strat[i][-1]*payoffs[i] for i in range(len(strat))])
+            avg_payoff.append(float(avg))
     return strat, avg_payoff
 
-T = 1000
-s = 1
-mu = 0.1
+T = 10**6
+s = 100
+mu = 0.01
 strat, y = evolve(s, mu, T, strategies)
 print "STRAT", strat
 y = np.array(y)
-x = np.arange(1, T+1)
-plt.xlim((0, T+5))
+x = np.arange(1, T/100 + 1)
+plt.xlim((0, T/100+1))
 plt.ylim((min(y) - 10, max(y) + 10))
 plt.scatter(x, y)
 plt.show()
