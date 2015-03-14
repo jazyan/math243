@@ -65,7 +65,8 @@ def selection (s, strat):
 def evolve (s, mu, T, strat):
     avg_payoff = []
     for t in range(T):
-        if random.uniform(0.0, 0.1) < mu:
+        print t
+        if random.uniform(0.0, 1.0) < mu:
             strat = mutation(strat)
         else:
             strat = selection(s, strat)
@@ -74,8 +75,10 @@ def evolve (s, mu, T, strat):
         avg_payoff.append(float(avg))
     return strat, avg_payoff
 
-T = 1000
-strat, y = evolve(100, 0.1, T, strategies)
+T = 10**5
+s = 100
+mu = 0.01
+strat, y = evolve(s, mu, T, strategies)
 print "STRAT", strat
 y = np.array(y)
 x = np.arange(1, T+1)
