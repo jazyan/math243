@@ -126,4 +126,5 @@ plt.xlim((0, T/100+1))
 plt.ylim((min(y) - 10, max(y) + 10))
 plt.scatter(x, y)
 plt.show()
+<<<<<<< HEAD
 '''
