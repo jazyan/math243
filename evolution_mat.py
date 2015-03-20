@@ -37,7 +37,7 @@ def choose_strat (strat):
 
 def check_equal (strat, new_s):
     for i in range(len(strat)):
-        if sorted(new_s) == sorted(strat[i][:-1]):
+        if new_s[:-1] == strat[i][:-1]:
             return i
     return -1
 
@@ -114,7 +114,7 @@ def evolve (s, mu, T, strat):
             avg_payoff.append(float(avg))
     return strat, avg_payoff
 
-T = 10**4
+T = 10**6
 s = 100
 mu = 0.01
 strat, y = evolve(s, mu, T, strategies)
