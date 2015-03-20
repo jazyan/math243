@@ -25,14 +25,13 @@ def read_parameters (f):
 
 eps, b, c, strategies, total = read_parameters(f_in)
 
+# to ensure the matrix is ergodic
 def error (strat):
     error = [(1.-eps)*strat[i] + eps*(1-strat[i]) for i in range(4)]
     error.append(strat[-1])
     return error
 
-def almost_eq (a, b):
-    return (abs(a - b) <= 0.00000001)
-
+# calculates the payoff b/w strat1 and strat2
 def pairwise_payoff (strat1, strat2):
     # add error to strategies
     p_c = error(strat1)
@@ -64,11 +63,14 @@ def pairwise_payoff (strat1, strat2):
 
     return pay_1, pay_2
 
+# weight the payoffs based on how many have the strategy
 def weight_payoff (N1, N2, pay_1, pay_2, self):
     if self:
         return pay_1*(N2 - 1)/(total - 1)
     return (pay_1*N2/(total - 1), pay_2*N1/(total - 1))
 
+
+# row i has strat i's payoffs against the rest of the strats
 def create_payoff_mat (strat):
     mat = [[0 for i in range(len(strat))] for j in range(len(strat))]
     for i in range(len(strat)):
@@ -80,16 +82,18 @@ def create_payoff_mat (strat):
             mat[j][i] = pay_ji
     return mat
 
+#
 def total_payoff(strat, payoff_mat):
     totals = [0 for i in range(len(strat))]
     for i in range(len(strat)):
+        # if strat[i][-1] = 1, then no weighted payoff against self
         if strat[i][-1] != 1:
-            #pay_1, pay_2 = pairwise_payoff(strat[i], strat[i])
             pay_1 = payoff_mat[i][i]
             pi_ii = weight_payoff(strat[i][-1], strat[i][-1], pay_1, pay_1, 1)
             totals[i] += pi_ii
+
+        # add weighted payoffs against rest of players
         for j in range(i+1, len(strat)):
-            #pay_1, pay_2 = pairwise_payoff(strat[i], strat[j])
             pay_1 = payoff_mat[i][j]
             pay_2 = payoff_mat[j][i]
             pi_ij, pi_ji = weight_payoff(strat[i][-1], strat[j][-1], pay_1, pay_2, 0)
