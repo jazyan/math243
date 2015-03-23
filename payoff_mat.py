@@ -5,7 +5,7 @@ import math
 # eps
 # b c
 # strat: q_cc q_cd q_dc q_dd num
-f_in = open('parameters.txt', 'r')
+f_in = open('parameters2.txt', 'r')
 
 # output file has expected payoffs
 f_out = open('avgpayoff_2.txt', 'w')
@@ -47,6 +47,9 @@ def pairwise_payoff (strat1, strat2):
         [p_c[i]*(1 - new_q_c[i]) for i in range(4)],
         [(1 - p_c[i])*new_q_c[i] for i in range(4)],
         [(1 - p_c[i])*(1 - new_q_c[i]) for i in range(4)]])
+    #I = np.identity(4)
+    #M = transition - I
+    #'''
     eig_val, eig_vec = np.linalg.eig(transition)
     eig_vec = np.around(eig_vec, decimals=2)
 
@@ -56,7 +59,12 @@ def pairwise_payoff (strat1, strat2):
 
     # might be scalar multiple, need to normalize so sum to 1
     eig_vec = [elt/sum(list(eig_vec[:,ind])) for elt in eig_vec[:,ind]]
-
+    '''
+    zero = np.array([0, 0, 0, 0])
+    ans = np.linalg.lstsq(M, zero)
+    print ans
+    print
+    '''
     # expected payoffs
     pay_1 = eig_vec[0]*(b-c) + eig_vec[1]*(-c) + eig_vec[2]*b
     pay_2 = eig_vec[0]*(b-c) + eig_vec[1]*(b) + eig_vec[2]*(-c)
@@ -82,7 +90,7 @@ def create_payoff_mat (strat):
             mat[j][i] = pay_ji
     return mat
 
-#
+# calculates total payoff
 def total_payoff(strat, payoff_mat):
     totals = [0 for i in range(len(strat))]
     for i in range(len(strat)):

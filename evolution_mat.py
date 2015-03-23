@@ -4,8 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from math import exp, isnan
 
-f_in = open('parameters.txt', 'r')
-f_out = open('avgpayoff.txt', 'w')
+f_in = open('parameters2.txt', 'r')
+f_out = open('avgpayoff.txt', 'a')
 
 eps, b, c, strategies, total = payoff.read_parameters(f_in)
 
@@ -44,7 +44,7 @@ def choose_strat (strat):
 # check if new_s is equal to already existing strat
 def check_equal (strat, new_s):
     for i in range(len(strat)):
-        if new_s[:-1] == strat[i][:-1]:
+        if new_s == strat[i][:-1]:
             return i
     return -1
 
@@ -131,15 +131,25 @@ def evolve (s, mu, T, strat):
         if t % 100 == 0:
             payoffs = payoff.total_payoff(strat, payoff_mat)
             avg = sum([strat[i][-1]*payoffs[i] for i in range(len(strat))])
-            avg_payoff.append(float(avg))
+            avg_payoff.append(float(avg)/float(total))
     return strat, avg_payoff
+
+# calc avg p_cc, p_cd, p_dc, p_dd
+def avg_payoff(strat):
+    avg = np.array([0. for i in range(4)])
+    for s in strat:
+        avg += np.array([s[i]*s[-1] for i in range(4)])
+    return [round(t/float(total), 4) for t in avg]
 
 T = 10**6
 s = 100
 mu = 0.01
 strat, y = evolve(s, mu, T, strategies)
-print "STRAT", strat
+#print "STRAT", strat
+avg = avg_payoff(strat)
+
 '''
+# graph the average payoff
 y = np.array(y)
 x = np.arange(1, T/100 + 1)
 plt.xlim((0, T/100+1))
@@ -147,3 +157,6 @@ plt.ylim((min(y) - 10, max(y) + 10))
 plt.scatter(x, y)
 plt.show()
 '''
+
+# write the final average payoff
+f_out.write(str(total) + ' ' + str(y[-1]) + ' ' + ' '.join(map(str, avg)) + '\n')
