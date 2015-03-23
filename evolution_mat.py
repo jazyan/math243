@@ -141,7 +141,7 @@ def avg_payoff(strat):
         avg += np.array([s[i]*s[-1] for i in range(4)])
     return [round(t/float(total), 4) for t in avg]
 
-T = 10**6
+T = 10**7
 s = 100
 mu = 0.01
 strat, y = evolve(s, mu, T, strategies)

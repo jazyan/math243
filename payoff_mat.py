@@ -8,7 +8,7 @@ import math
 f_in = open('parameters2.txt', 'r')
 
 # output file has expected payoffs
-f_out = open('avgpayoff_2.txt', 'w')
+f_out = open('avgpayoff_3.txt', 'w')
 
 # returns info read from file
 def read_parameters (f):
@@ -31,6 +31,15 @@ def error (strat):
     error.append(strat[-1])
     return error
 
+
+def null(A, eps = 1e-15):
+    u, s, vh = np.linalg.svd(A)
+    null_mask = (s <= eps)
+    null_space = np.compress(null_mask, vh, axis=0)
+    S = sum(list(null_space[0]))
+    return [round(n, 2)/S for n in null_space[0]]
+
+
 # calculates the payoff b/w strat1 and strat2
 def pairwise_payoff (strat1, strat2):
     # add error to strategies
@@ -47,9 +56,9 @@ def pairwise_payoff (strat1, strat2):
         [p_c[i]*(1 - new_q_c[i]) for i in range(4)],
         [(1 - p_c[i])*new_q_c[i] for i in range(4)],
         [(1 - p_c[i])*(1 - new_q_c[i]) for i in range(4)]])
-    #I = np.identity(4)
-    #M = transition - I
-    #'''
+    I = np.identity(4)
+    M = transition - I
+    '''
     eig_val, eig_vec = np.linalg.eig(transition)
     eig_vec = np.around(eig_vec, decimals=2)
 
@@ -60,11 +69,8 @@ def pairwise_payoff (strat1, strat2):
     # might be scalar multiple, need to normalize so sum to 1
     eig_vec = [elt/sum(list(eig_vec[:,ind])) for elt in eig_vec[:,ind]]
     '''
-    zero = np.array([0, 0, 0, 0])
-    ans = np.linalg.lstsq(M, zero)
-    print ans
-    print
-    '''
+    eig_vec = null(M)
+
     # expected payoffs
     pay_1 = eig_vec[0]*(b-c) + eig_vec[1]*(-c) + eig_vec[2]*b
     pay_2 = eig_vec[0]*(b-c) + eig_vec[1]*(b) + eig_vec[2]*(-c)
