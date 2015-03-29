@@ -58,17 +58,7 @@ def pairwise_payoff (strat1, strat2):
         [(1 - p_c[i])*(1 - new_q_c[i]) for i in range(4)]])
     I = np.identity(4)
     M = transition - I
-    '''
-    eig_val, eig_vec = np.linalg.eig(transition)
-    eig_vec = np.around(eig_vec, decimals=2)
 
-    # find index of vector with eig val = 1
-    eig_val = [round(i, 5) for i in eig_val]
-    ind = list(eig_val).index(1.)
-
-    # might be scalar multiple, need to normalize so sum to 1
-    eig_vec = [elt/sum(list(eig_vec[:,ind])) for elt in eig_vec[:,ind]]
-    '''
     eig_vec = null(M)
 
     # expected payoffs
