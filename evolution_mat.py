@@ -143,7 +143,7 @@ def avg_payoff(strat):
 
 T = 10**7
 s = 100
-mu = 0.01
+mu = 0.001
 strat, y = evolve(s, mu, T, strategies)
 #print "STRAT", strat
 avg = avg_payoff(strat)
