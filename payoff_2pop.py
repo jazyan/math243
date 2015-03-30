@@ -119,6 +119,7 @@ def total_payoff(strat_1, strat_2, mat):
 
 if __name__ == '__main__':
     payoff_mat = create_payoff_mat (strat1, strat2)
+    print payoff_mat
     t1, t2 = total_payoff(strat1, strat2, payoff_mat)
     print t1, t2
     f_out.write("Pop 1 payoffs\n")
