@@ -128,13 +128,25 @@ def selection (s, strat, strat_other, pop_ind, payoff_mat):
         payoff_mat = pf
     return strat, payoff_mat
 
+# calc avg p_cc, p_cd, p_dc, p_dd
+def avg_payoff(strat, pop_ind):
+    avg = np.array([0. for i in range(4)])
+    for s in strat:
+        avg += np.array([s[i]*s[-1] for i in range(4)])
+    if pop_ind == 0:
+        return [round(t/float(total1), 4) for t in avg]
+    else:
+        return [round(t/float(total2), 4) for t in avg]
+
+
 # s = strength of selection
 # mu = prob of mutation, 1 - mu = prob of selection
 # T = timesteps
 # p = prob of event in pop 1, 1 - p = prob of event in pop 2
 def evolve (s, mu, p, T, strat1, strat2):
     mat = po.create_payoff_mat (strat1, strat2)
-
+    avg_pay1 = [0 for i in range(4)]
+    avg_pay2 = [0 for i in range(4)]
     # number of evolutions
     for t in range(T):
         print t
@@ -152,6 +164,10 @@ def evolve (s, mu, p, T, strat1, strat2):
                 strat1, mat = selection(s, strat1, strat2, 0, mat)
             else:
                 strat2, mat = selection(s, strat2, strat1, 1, mat)
+        avg_payT1 = avg_payoff(strat1, 0)
+        avg_payT2 = avg_payoff(strat2, 1)
+        avg_pay1 = [avg_pay1[i] + avg_payT1[i] for i in range(4)]
+        avg_pay2 = [avg_pay2[i] + avg_payT2[i] for i in range(4)]
         '''
         # store every 100th avg payoff for payoff graph
         if t % 100 == 0:
@@ -159,22 +175,19 @@ def evolve (s, mu, p, T, strat1, strat2):
             avg = sum([strat[i][-1]*payoffs[i] for i in range(len(strat))])
             avg_payoff.append(float(avg)/float(total))
         '''
-    return strat1, strat2
+    avg_pay1 = [round(a/float(T), 2) for a in avg_pay1]
+    avg_pay2 = [round(a/float(T), 2) for a in avg_pay2]
+    return strat1, strat2, avg_pay1, avg_pay2
 
-# calc avg p_cc, p_cd, p_dc, p_dd
-def avg_payoff(strat):
-    avg = np.array([0. for i in range(4)])
-    for s in strat:
-        avg += np.array([s[i]*s[-1] for i in range(4)])
-    return [round(t/float(total), 4) for t in avg]
-
-T = 10**7
+T = 10**6
 s = 100
 mu = 0.001
 p = 0.5
-strat1, strat2 = evolve (s, mu, p, T, strat1, strat2)
+strat1, strat2, avg_pay1, avg_pay2 = evolve (s, mu, p, T, strat1, strat2)
 print "STRAT1", strat1
 print "STRAT2", strat2
+print "PAY1", avg_pay1
+print "PAY2", avg_pay2
 #avg = avg_payoff(strat)
 
 '''
