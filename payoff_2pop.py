@@ -10,7 +10,7 @@ f_pop1 = open('parameters.txt', 'r')
 f_pop2 = open('parameters2.txt', 'r')
 
 # output file has expected payoffs
-f_out = open('avgpayoff_3.txt', 'w')
+f_out = open('avgpayoff_2.txt', 'w')
 
 # returns info read from file
 def read_parameters (f):
@@ -69,8 +69,9 @@ def pairwise_payoff (strat1, strat2):
     pay_1 = eig_vec[0]*(b1-c1) + eig_vec[1]*(-c1) + eig_vec[2]*b1
     pay_2 = eig_vec[0]*(b2-c2) + eig_vec[1]*(b2) + eig_vec[2]*(-c2)
     # average coop
-    avg_coop = eig_vec[0] + 0.5*(eig_vec[1] + eig_vec[2])
-    return pay_1, pay_2, avg_coop
+    coop_1 = eig_vec[0] + eig_vec[1]
+    coop_2 = eig_vec[0] + eig_vec[2]
+    return pay_1, pay_2, coop_1, coop_2
 
 
 # create payoff matrices with pop_1 as rows, and pop_2 as cols
@@ -84,9 +85,9 @@ def create_payoff_mat (strat_1, strat_2):
 
     for i in range(L1):
         for j in range(L2):
-            pay_1, pay_2, avg_coop = pairwise_payoff(strat_1[i], strat_2[j])
+            pay_1, pay_2, coop_1, coop_2 = pairwise_payoff(strat_1[i], strat_2[j])
             pay_mat[i][j] = (pay_1, pay_2)
-            coop_mat[i][j] = avg_coop
+            coop_mat[i][j] = (coop_1, coop_2)
     return pay_mat, coop_mat
 
 
@@ -120,21 +121,28 @@ def total_payoff(strat_1, strat_2, mat):
     totals_2 = [total_payoff_strat(i, 1, strat_1, mat) for i in range(L2)]
     return totals_1, totals_2
 
-def coop_avg_calc (strat_1, mat):
-    total = [s[-1] for s in strat_1]
+def coop_avg_calc (strat, mat, pop_ind):
+    total = [s[-1] for s in strat]
     S = sum(total)
     totals = np.array(total)/S
-    dot_prod = np.dot(totals, np.array(mat))
-    return np.sum(dot_prod)/len(mat[0])
+    if pop_ind == 0:
+        mat_use = [[elt[0] for elt in mat[i]] for i in range(len(mat))]
+        dot_prod = np.dot(totals, np.array(mat_use))
+    else:
+        mat_use = [[elt[1] for elt in mat[i]] for i in range(len(mat))]
+        dot_prod = np.dot(totals, np.array(mat_use).T)
+    return np.sum(dot_prod)/len(mat_use[0])
 
 if __name__ == '__main__':
     payoff_mat, coop_mat = create_payoff_mat (strat1, strat2)
     t1, t2 = total_payoff(strat1, strat2, payoff_mat)
-    avg_coop = coop_avg_calc(strat1, coop_mat)
+    coop_1 = coop_avg_calc(strat1, coop_mat, 0)
+    coop_2 = coop_avg_calc(strat2, coop_mat, 1)
     f_out.write("Pop 1 payoffs\n")
     for t in t1:
         f_out.write(str(t) + "\n")
     f_out.write("Pop 2 payoffs\n")
     for t in t2:
         f_out.write(str(t) + "\n")
-    f_out.write("Avg cooperation: " + str(avg_coop) + '\n')
+    f_out.write("coop 1: " + str(coop_1) + '\n')
+    f_out.write("coop 2: " + str(coop_2) + '\n')
