@@ -68,8 +68,9 @@ def pairwise_payoff (strat1, strat2):
     # expected payoffs
     pay_1 = eig_vec[0]*(b1-c1) + eig_vec[1]*(-c1) + eig_vec[2]*b1
     pay_2 = eig_vec[0]*(b2-c2) + eig_vec[1]*(b2) + eig_vec[2]*(-c2)
-
-    return pay_1, pay_2
+    # average coop
+    avg_coop = eig_vec[0] + 0.5*(eig_vec[1] + eig_vec[2])
+    return pay_1, pay_2, avg_coop
 
 
 # create payoff matrices with pop_1 as rows, and pop_2 as cols
@@ -78,12 +79,15 @@ def create_payoff_mat (strat_1, strat_2):
     L1 = len(strat_1)
     L2 = len(strat_2)
 
-    mat = [[0 for i in range(L2)] for j in range(L1)]
+    pay_mat = [[0 for i in range(L2)] for j in range(L1)]
+    coop_mat = [[0 for i in range(L2)] for j in range(L1)]
+
     for i in range(L1):
         for j in range(L2):
-            pay_1, pay_2 = pairwise_payoff(strat_1[i], strat_2[j])
-            mat[i][j] = (pay_1, pay_2)
-    return mat
+            pay_1, pay_2, avg_coop = pairwise_payoff(strat_1[i], strat_2[j])
+            pay_mat[i][j] = (pay_1, pay_2)
+            coop_mat[i][j] = avg_coop
+    return pay_mat, coop_mat
 
 
 # calculates payoff for single strat S at index i
@@ -116,15 +120,21 @@ def total_payoff(strat_1, strat_2, mat):
     totals_2 = [total_payoff_strat(i, 1, strat_1, mat) for i in range(L2)]
     return totals_1, totals_2
 
+def coop_avg_calc (strat_1, mat):
+    total = [s[-1] for s in strat_1]
+    S = sum(total)
+    totals = np.array(total)/S
+    dot_prod = np.dot(totals, np.array(mat))
+    return np.sum(dot_prod)/len(mat[0])
 
 if __name__ == '__main__':
-    payoff_mat = create_payoff_mat (strat1, strat2)
-    print payoff_mat
+    payoff_mat, coop_mat = create_payoff_mat (strat1, strat2)
     t1, t2 = total_payoff(strat1, strat2, payoff_mat)
-    print t1, t2
+    avg_coop = coop_avg_calc(strat1, coop_mat)
     f_out.write("Pop 1 payoffs\n")
     for t in t1:
         f_out.write(str(t) + "\n")
     f_out.write("Pop 2 payoffs\n")
     for t in t2:
         f_out.write(str(t) + "\n")
+    f_out.write("Avg cooperation: " + str(avg_coop) + '\n')
