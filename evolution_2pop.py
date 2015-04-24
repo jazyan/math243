@@ -8,7 +8,7 @@ import sys
 # f_popn -> parameters for population n
 f_pop1 = open('parameters.txt', 'r')
 f_pop2 = open('parameters2.txt', 'r')
-f_out = open('avgpayoff.txt', 'a')
+f_out = open(sys.argv[2], 'a')
 
 eps1, b1, c1, strat1, total1 = po.read_parameters(f_pop1)
 eps2, b2, c2, strat2, total2 = po.read_parameters(f_pop2)
@@ -27,17 +27,35 @@ def check_extinct (ind, strat, pop_ind, payoff_mat, coop_mat):
     # if we have first population, we update the rows
     if pop_ind == 0:
         payoff_mat[ind] = payoff_mat[-1]
-        coop_mat[ind] = coop_mat[-1]
+        coop_mat[0][ind] = coop_mat[0][-1]
+        coop_mat[1][ind] = coop_mat[1][-1]
         payoff_mat.pop()
-        coop_mat.pop()
+        coop_mat[0].pop()
+        coop_mat[1].pop()
 
     # if we have the second population, we update the columns
     if pop_ind == 1:
         for i in range(len(payoff_mat)):
             payoff_mat[i][ind] = payoff_mat[i][-1]
             payoff_mat[i].pop()
-            coop_mat[i][ind] = coop_mat[i][-1]
-            coop_mat[i].pop()
+            coop_mat[0][i][ind] = coop_mat[0][i][-1]
+            coop_mat[1][i][ind] = coop_mat[1][i][-1]
+            coop_mat[0][i].pop()
+            coop_mat[1][i].pop()
+        '''
+        print payoff_mat, ind
+        payoff_mat = np.array(payoff_mat).T
+        print payoff_mat, ind
+        coop_mat = np.transpose(np.array(coop_mat), axes= (0, 2, 1))
+        payoff_mat[ind] = payoff_mat[-1]
+        coop_mat[0][ind] = coop_mat[0][-1]
+        coop_mat[1][ind] = coop_mat[1][-1]
+        payoff_mat.pop()
+        coop_mat[0].pop()
+        coop_mat[1].pop()
+        payoff_mat = np.transpose(payoff_mat).tolist()
+        coop_mat = np.transpose(payoff_mat, axes= (0, 2, 1)).tolist()
+        '''
     return (strat, payoff_mat, coop_mat)
 
 
@@ -65,20 +83,22 @@ def mutation (strat_mut, strat_other, pop_ind, payoff_mat, coop_mat):
     # calculate payoffs - add new_strat to end, pi_new append at end,
     # and vec of pi_new append at end
     new_payoffs = [0 for i in range(L)]
-    new_coop = [0 for i in range(L)]
+    new_coop = [[0 for i in range(L)] for j in range(2)]
     if pop_ind == 0:
         for i in range(L):
             pay1, pay2, coop1, coop2 = po.pairwise_payoff(new_strat, strat_other[i])
             new_payoffs[i] = (pay1, pay2)
-            new_coop[i] = (coop1, coop2)
+            new_coop[0][i], new_coop[1][i] = coop1, coop2
         payoff_mat.append(new_payoffs)
-        coop_mat.append(new_coop)
+        coop_mat[0].append(new_coop[0])
+        coop_mat[1].append(new_coop[1])
     # second pop -- add a new column
     if pop_ind == 1:
         for i in range(L):
             pi_s, pi_new, coop1, coop2 = po.pairwise_payoff(strat_other[i], new_strat)
             payoff_mat[i].append((pi_s, pi_new))
-            coop_mat[i].append((coop1, coop2))
+            coop_mat[0][i].append(coop1)
+            coop_mat[1][i].append(coop2)
 
     # add the strat
     strat_mut.append(new_strat + [1.0])
@@ -124,17 +144,6 @@ def selection (s, strat, strat_other, pop_ind, payoff_mat, coop_mat):
         coop_mat = cm
     return strat, payoff_mat, coop_mat
 
-# calc avg p_cc, p_cd, p_dc, p_dd
-def avg_strat(strat, pop_ind):
-    avg = np.array([0. for i in range(4)])
-    for s in strat:
-        avg += np.array([s[i]*s[-1] for i in range(4)])
-    if pop_ind == 0:
-        return [round(t/float(total1), 4) for t in avg]
-    else:
-        return [round(t/float(total2), 4) for t in avg]
-
-
 # s = strength of selection
 # mu = prob of mutation, 1 - mu = prob of selection
 # T = timesteps
@@ -162,10 +171,11 @@ def evolve (s, mu, p, T, strat1, strat2):
         coop2 += po.coop_avg_calc(strat2, cmat, 1)
     return strat1, strat2, coop1/T, coop2/T
 
-T = 10
+T = 10**7
 s = 100
 mu = 0.1
 p = float(sys.argv[1])
 strat1, strat2, coop1, coop2 = evolve (s, mu, p, T, strat1, strat2)
 
+print p
 f_out.write(str(coop1) + ' ' + str(coop2) + '\n')

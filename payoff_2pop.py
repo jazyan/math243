@@ -81,13 +81,14 @@ def create_payoff_mat (strat_1, strat_2):
     L2 = len(strat_2)
 
     pay_mat = [[0 for i in range(L2)] for j in range(L1)]
-    coop_mat = [[0 for i in range(L2)] for j in range(L1)]
+    coop_mat = [[[0 for i in range(L2)] for j in range(L1)] for k in range(2)]
 
     for i in range(L1):
         for j in range(L2):
             pay_1, pay_2, coop_1, coop_2 = pairwise_payoff(strat_1[i], strat_2[j])
             pay_mat[i][j] = (pay_1, pay_2)
-            coop_mat[i][j] = (coop_1, coop_2)
+            coop_mat[0][i][j] = coop_1
+            coop_mat[1][i][j] = coop_2
     return pay_mat, coop_mat
 
 
@@ -125,13 +126,14 @@ def coop_avg_calc (strat, mat, pop_ind):
     total = [s[-1] for s in strat]
     S = sum(total)
     totals = np.array(total)/S
+    L = 0
     if pop_ind == 0:
-        mat_use = [[elt[0] for elt in mat[i]] for i in range(len(mat))]
-        dot_prod = np.dot(totals, np.array(mat_use))
+        dot_prod = np.dot(totals, np.array(mat[0]))
+        L = len(mat[0])
     else:
-        mat_use = [[elt[1] for elt in mat[i]] for i in range(len(mat))]
-        dot_prod = np.dot(totals, np.array(mat_use).T)
-    return np.sum(dot_prod)/len(mat_use[0])
+        dot_prod = np.dot(totals, np.array(mat[1]).T)
+        L = len(mat[0][0])
+    return np.sum(dot_prod)/L
 
 if __name__ == '__main__':
     payoff_mat, coop_mat = create_payoff_mat (strat1, strat2)
