@@ -51,43 +51,25 @@ def choose_strat (strat, pop_ind):
     return -1
 
 
-# check if new_s is equal to already existing strat
-def check_equal (strat, new_s):
-    for i in range(len(strat)):
-        if new_s == strat[i][:-1]:
-            return i
-    return -1
-
-
 # mutation event: a strat changes to random strat with prob mu
 # strat_other is the other population's strategies - for calc payoffs
 def mutation (strat_mut, strat_other, pop_ind, payoff_mat):
     new_strat = [round(random.uniform(0.0, 1.0), 2) for i in range(4)]
+    L = len(strat_other)
 
-    # check if random new strat is same
-    ind = check_equal (strat_mut, new_strat)
-    if ind != -1:
-        strat[ind][-1] += 1.
-
-    # if not the same, then add strat
     # calculate payoffs - add new_strat to end, pi_new append at end,
     # and vec of pi_new append at end
-    else:
-        # first pop -- add a new row
-        if pop_ind == 0:
-            new_payoffs = []
-            for i in range(len(strat_other)):
-                pi_new, pi_s = po.pairwise_payoff(new_strat, strat_other[i])
-                new_payoffs.append((pi_new, pi_s))
-            payoff_mat.append(new_payoffs)
-        # second pop -- add a new column
-        if pop_ind == 1:
-            for i in range(len(strat_other)):
-                pi_s, pi_new = po.pairwise_payoff(strat_other[i], new_strat)
-                payoff_mat[i].append((pi_s, pi_new))
+    if pop_ind == 0:
+        new_payoffs = [po.pairwise_payoff(new_strat, strat) for strat in strat_other]
+        payoff_mat.append(new_payoffs)
+    # second pop -- add a new column
+    if pop_ind == 1:
+        for i in range(L):
+            pi_s, pi_new = po.pairwise_payoff(strat_other[i], new_strat)
+            payoff_mat[i].append((pi_s, pi_new))
 
-        # add the strat
-        strat_mut.append(new_strat + [1.0])
+    # add the strat
+    strat_mut.append(new_strat + [1.0])
 
     # subtract one from the randomly selected strat
     ind = choose_strat(strat_mut, pop_ind)
@@ -129,7 +111,7 @@ def selection (s, strat, strat_other, pop_ind, payoff_mat):
     return strat, payoff_mat
 
 # calc avg p_cc, p_cd, p_dc, p_dd
-def avg_payoff(strat, pop_ind):
+def avg_strat(strat, pop_ind):
     avg = np.array([0. for i in range(4)])
     for s in strat:
         avg += np.array([s[i]*s[-1] for i in range(4)])
@@ -145,11 +127,8 @@ def avg_payoff(strat, pop_ind):
 # p = prob of event in pop 1, 1 - p = prob of event in pop 2
 def evolve (s, mu, p, T, strat1, strat2):
     mat = po.create_payoff_mat (strat1, strat2)
-    avg_pay1 = [0 for i in range(4)]
-    avg_pay2 = [0 for i in range(4)]
     # number of evolutions
     for t in range(T):
-        print t
         # mutation
         if random.uniform(0.0, 1.0) < mu:
             # whether in pop1 or pop2
@@ -164,41 +143,13 @@ def evolve (s, mu, p, T, strat1, strat2):
                 strat1, mat = selection(s, strat1, strat2, 0, mat)
             else:
                 strat2, mat = selection(s, strat2, strat1, 1, mat)
-        avg_payT1 = avg_payoff(strat1, 0)
-        avg_payT2 = avg_payoff(strat2, 1)
-        avg_pay1 = [avg_pay1[i] + avg_payT1[i] for i in range(4)]
-        avg_pay2 = [avg_pay2[i] + avg_payT2[i] for i in range(4)]
-        '''
-        # store every 100th avg payoff for payoff graph
-        if t % 100 == 0:
-            pay1, pay2 = po.total_payoff(strat1, strat2, mat)
-            avg = sum([strat[i][-1]*payoffs[i] for i in range(len(strat))])
-            avg_payoff.append(float(avg)/float(total))
-        '''
-    avg_pay1 = [round(a/float(T), 2) for a in avg_pay1]
-    avg_pay2 = [round(a/float(T), 2) for a in avg_pay2]
-    return strat1, strat2, avg_pay1, avg_pay2
+    return strat1, strat2
 
-T = 10**6
+T = 10**7
 s = 100
-mu = 0.001
+mu = 0.1
 p = 0.5
-strat1, strat2, avg_pay1, avg_pay2 = evolve (s, mu, p, T, strat1, strat2)
+strat1, strat2 = evolve (s, mu, p, T, strat1, strat2)
 print "STRAT1", strat1
 print "STRAT2", strat2
-print "PAY1", avg_pay1
-print "PAY2", avg_pay2
-#avg = avg_payoff(strat)
 
-'''
-# graph the average payoff
-y = np.array(y)
-x = np.arange(1, T/100 + 1)
-plt.xlim((0, T/100+1))
-plt.ylim((min(y) - 10, max(y) + 10))
-plt.scatter(x, y)
-plt.show()
-
-# write the final average payoff
-f_out.write(str(total) + ' ' + str(y[-1]) + ' ' + ' '.join(map(str, avg)) + '\n')
-'''
