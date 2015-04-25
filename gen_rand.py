@@ -3,7 +3,7 @@
 import random
 import sys
 
-f = open(sys.argv[2], 'w')
+f = open(sys.argv[3], 'w')
 
 def check_equal(strat, new_s):
     for i in range(len(strat)):
@@ -21,7 +21,7 @@ for i in range(int(sys.argv[1])):
         strat.append(new_strat + [1.0])
 
 f.write('0.00001\n')
-f.write('3 1\n')
+f.write('3 ' + str(sys.argv[2]) + '\n')
 for s in strat:
     w = ' '.join(map(str, s))
     f.write(w + '\n')
