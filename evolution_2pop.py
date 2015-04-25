@@ -8,7 +8,7 @@ import sys
 # f_popn -> parameters for population n
 f_pop1 = open('parameters.txt', 'r')
 f_pop2 = open('parameters2.txt', 'r')
-f_out = open(sys.argv[2], 'a')
+f_out = open(sys.argv[1], 'a')
 
 eps1, b1, c1, strat1, total1 = po.read_parameters(f_pop1)
 eps2, b2, c2, strat2, total2 = po.read_parameters(f_pop2)
@@ -171,10 +171,10 @@ def evolve (s, mu, p, T, strat1, strat2):
         coop2 += po.coop_avg_calc(strat2, cmat, 1)
     return strat1, strat2, coop1/T, coop2/T
 
-T = 10**7
+T = 10**5
 s = 100
 mu = 0.1
-p = float(sys.argv[1])
+p = 0.5
 strat1, strat2, coop1, coop2 = evolve (s, mu, p, T, strat1, strat2)
 
 print p

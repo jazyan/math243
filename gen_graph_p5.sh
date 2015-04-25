@@ -6,9 +6,9 @@ cp empty.txt avgpayoff5.txt
 
 for i in `seq 1 5`;
 do
-    python gen_rand.py 100 parameters.txt
-    python gen_rand.py 100 parameters2.txt
-    time python evolution_2pop.py 0.9 avgpayoff5.txt
+    python gen_rand.py 100 2.5 parameters.txt
+    python gen_rand.py 100 1 parameters2.txt
+    time python evolution_2pop.py avgpayoff5.txt
 done
 
 echo "Done"

@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-f = open('avgcoop.txt', 'r')
+f = open('avgcoop_p.txt', 'r')
 
 x = [0.1, 0.3, 0.5, 0.7, 0.9]
 T1, T2 = 0., 0.
