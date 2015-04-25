@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
-f = open('avgpayoff.txt', 'r')
+f = open('avgcoop.txt', 'r')
 
 x = [0.1, 0.3, 0.5, 0.7, 0.9]
 T1, T2 = 0., 0.
@@ -19,6 +20,12 @@ for i in range(len(x)*5):
         T1 += val1
         T2 += val2
 
-plt.plot(x, avg_val1)
-plt.plot(x, avg_val2)
+plt.title('Relative speed of evolution')
+plt.xlim((0.1, 0.9))
+plt.xlabel('% of pop 2 evolution iterations')
+plt.ylabel('Avg Cooperation')
+print np.array(avg_val1) - np.array(avg_val2)
+plt.plot(x, avg_val1, '*-', label='pop 1')
+plt.plot(x, avg_val2, '*-', label='pop 2')
+plt.legend()
 plt.show()
