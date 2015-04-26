@@ -21,7 +21,7 @@ for i in range(int(sys.argv[1])):
         strat.append(new_strat + [1.0])
 
 f.write('0.00001\n')
-f.write('3 ' + str(sys.argv[2]) + '\n')
+f.write('5 ' + str(sys.argv[2]) + '\n')
 for s in strat:
     w = ' '.join(map(str, s))
     f.write(w + '\n')

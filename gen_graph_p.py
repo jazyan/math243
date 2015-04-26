@@ -22,7 +22,7 @@ for i in range(len(x)*5):
 
 plt.title('Relative speed of evolution')
 plt.xlim((0.1, 0.9))
-plt.xlabel('% of pop 2 evolution iterations')
+plt.xlabel('% evolution iterations in pop 1')
 plt.ylabel('Avg Cooperation')
 print np.array(avg_val1) - np.array(avg_val2)
 plt.plot(x, avg_val1, '*-', label='pop 1')

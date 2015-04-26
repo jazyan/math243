@@ -177,5 +177,5 @@ mu = 0.1
 p = 0.5
 strat1, strat2, coop1, coop2 = evolve (s, mu, p, T, strat1, strat2)
 
-print p
+print c1
 f_out.write(str(coop1) + ' ' + str(coop2) + '\n')
