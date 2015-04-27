@@ -42,20 +42,6 @@ def check_extinct (ind, strat, pop_ind, payoff_mat, coop_mat):
             coop_mat[1][i][ind] = coop_mat[1][i][-1]
             coop_mat[0][i].pop()
             coop_mat[1][i].pop()
-        '''
-        print payoff_mat, ind
-        payoff_mat = np.array(payoff_mat).T
-        print payoff_mat, ind
-        coop_mat = np.transpose(np.array(coop_mat), axes= (0, 2, 1))
-        payoff_mat[ind] = payoff_mat[-1]
-        coop_mat[0][ind] = coop_mat[0][-1]
-        coop_mat[1][ind] = coop_mat[1][-1]
-        payoff_mat.pop()
-        coop_mat[0].pop()
-        coop_mat[1].pop()
-        payoff_mat = np.transpose(payoff_mat).tolist()
-        coop_mat = np.transpose(payoff_mat, axes= (0, 2, 1)).tolist()
-        '''
     return (strat, payoff_mat, coop_mat)
 
 
@@ -177,5 +163,5 @@ mu = 0.1
 p = 0.5
 strat1, strat2, coop1, coop2 = evolve (s, mu, p, T, strat1, strat2)
 
-print c1
+print total1, total2
 f_out.write(str(coop1) + ' ' + str(coop2) + '\n')
