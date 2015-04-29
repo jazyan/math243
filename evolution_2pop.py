@@ -157,8 +157,8 @@ def evolve (s, mu, p, T, strat1, strat2):
         coop2 += po.coop_avg_calc(strat2, cmat, 1)
     return strat1, strat2, coop1/T, coop2/T
 
-T = 10**7
-s = 100
+T = 10**2
+s = 10
 mu = 0.1
 p = 0.5
 strat1, strat2, coop1, coop2 = evolve (s, mu, p, T, strat1, strat2)
