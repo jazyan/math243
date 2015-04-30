@@ -4,7 +4,7 @@ echo "Script is starting"
 
 cp empty.txt avgpayoff3.txt
 
-for i in `seq 1 5`;
+for i in `seq 1 10`;
 do
     python gen_rand.py 100 1 parameters.txt
     python gen_rand.py 100 1 parameters2.txt
