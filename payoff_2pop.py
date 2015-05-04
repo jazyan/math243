@@ -10,7 +10,7 @@ f_pop1 = open('parameters.txt', 'r')
 f_pop2 = open('parameters2.txt', 'r')
 
 # output file has expected payoffs
-f_out = open('avgpayoff_2.txt', 'w')
+f_out = open('test_pay.txt', 'w')
 
 # returns info read from file
 def read_parameters (f):
@@ -126,13 +126,14 @@ def coop_avg_calc (strat, mat, pop_ind):
     total = [s[-1] for s in strat]
     S = sum(total)
     totals = np.array(total)/S
+    print total, totals
     L = 0
     if pop_ind == 0:
         dot_prod = np.dot(totals, np.array(mat[0]))
-        L = len(mat[0])
+        L = len(mat[0][0])
     else:
         dot_prod = np.dot(totals, np.array(mat[1]).T)
-        L = len(mat[0][0])
+        L = len(mat[0])
     return np.sum(dot_prod)/L
 
 if __name__ == '__main__':
